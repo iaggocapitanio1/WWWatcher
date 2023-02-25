@@ -110,7 +110,12 @@ def part_compact_panels_payload(data_frame: DataFrame, belongs_to: str, orderBy:
                             partName=name,
                             material=mat,
                             amount=quant,
-                            dimensions=Polygon([(0, 0), (0, length), (width, length), (width, 0), (0, 0)]).__str__(),
+                            length=length,
+                            weight=width,
+                            dimensions=dict(
+                                type="Polygon",
+                                coordinates=[[[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]]]
+                            ),
                             thickness=thickness,
                             tag=tag,
                             nestingFlag=check(nesting),
@@ -149,7 +154,12 @@ def part_panels_payload(data_frame: DataFrame, belongs_to: str, orderBy: str, **
                             sort=sort,
                             material=mat,
                             amount=quant,
-                            dimensions=Polygon([(0, 0), (0, length), (width, length), (width, 0), (0, 0)]).__str__(),
+                            length=length,
+                            width=width,
+                            dimensions=dict(
+                                type="Polygon",
+                                coordinates=[[[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]]]
+                            ),
                             thickness=thickness,
                             tag=tag,
                             nestingFlag=check(nesting),

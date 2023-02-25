@@ -8,6 +8,7 @@ from settings.client import oauth
 
 class BasePayload(object):
     PROPS_TO_EXCLUDE = ['context', 'headers', 'url', 'id', 'type', 'link_headers']
+    GEO_PROPERTY = []
     RELATIONAL_PROPS = []
 
     def __init__(self, **kwargs) -> None:
@@ -26,6 +27,10 @@ class BasePayload(object):
 
     def get_relational_props(self):
         return self.validate_props(props=self.RELATIONAL_PROPS)
+
+    def get_geo_props(self):
+        return self.validate_props(props=self.GEO_PROPERTY)
+
 
     @property
     def id(self) -> str:
@@ -64,7 +69,7 @@ class BasePayload(object):
 
     def clean_properties(self) -> List[str]:
         props = self.get_all_properties()
-        for removable in self.get_props_to_exclude() + self.get_relational_props():
+        for removable in self.get_props_to_exclude() + self.get_relational_props() + self.get_geo_props():
             if removable in props:
                 props.remove(removable)
         return props
@@ -77,12 +82,12 @@ class BasePayload(object):
 
     def body(self) -> dict:
         payload_body = dict(id=self.id, type=self.type)
-        print(payload_body)
         for prop in self.clean_properties():
             payload_body[prop] = self.create_field(_type='Property', value=getattr(self, prop))
-        # payload_body["@context"] = self.context
         for prop in self.get_relational_props():
             payload_body[prop] = self.create_field(_type='Relationship', value=getattr(self, prop), relationship=True)
+        for prop in self.get_geo_props():
+            payload_body[prop] = self.create_field(_type='GeoProperty', value=getattr(self, prop))
         return payload_body
 
     def partial_body(self) -> dict:

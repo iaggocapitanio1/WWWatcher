@@ -4,6 +4,7 @@ from .core.core import BasePayload
 # noinspection PyPep8Naming
 class PartPayload(BasePayload):
     RELATIONAL_PROPS = ['belongsTo', 'orderBy', ]
+    GEO_PROPERTY = ["dimensions"]
 
     def __init__(self, **kwargs):
         super(PartPayload, self).__init__(**kwargs)
@@ -25,6 +26,8 @@ class PartPayload(BasePayload):
         self.orla3 = kwargs.get("orla3", False)
         self.orla4 = kwargs.get("orla4", False)
         self.orla5 = kwargs.get("orla5", False)
+        self.length = kwargs.get('length', -1)
+        self.width = kwargs.get('width', -1)
         self.observation = kwargs.get("observation", "")
         self.weight = kwargs.get("weight", -1)
         self.image = kwargs.get("image", "")
@@ -145,6 +148,22 @@ class PartPayload(BasePayload):
         self._f2 = f2
 
     @property
+    def width(self) -> float:
+        return self._width
+
+    @width.setter
+    def width(self, width: float) -> None:
+        self._width = width
+
+    @property
+    def length(self) -> float:
+        return self._length
+
+    @length.setter
+    def length(self, length: float) -> None:
+        self._length = length
+
+    @property
     def cncFlag(self) -> bool:
         return self._cncFlag
 
@@ -169,11 +188,11 @@ class PartPayload(BasePayload):
         self._thickness = thickness
 
     @property
-    def dimensions(self) -> int:
+    def dimensions(self) -> dict:
         return self._dimensions
 
     @dimensions.setter
-    def dimensions(self, dimensions: int) -> None:
+    def dimensions(self, dimensions: dict) -> None:
         self._dimensions = dimensions
 
     @property
