@@ -5,6 +5,7 @@ import datetime
 from pathlib import Path
 from payload import ConsumablePayload, PartPayload
 from settings import settings
+from geojson import Polygon
 
 logger = logging.getLogger(__name__)
 
@@ -103,13 +104,13 @@ def part_compact_panels_payload(data_frame: DataFrame, belongs_to: str, orderBy:
     for index, row in tuple(data_frame.iterrows()):
         logger.info(f"Compact Panels Row: \n {row}")
         name, mat, quant, length, width, thickness, tag, nesting, cnc, f2, f3, f4, f5, obs = row
+
         identifier: str = generate_id(name, object_type='Part')
         panel = PartPayload(id=identifier,
                             partName=name,
                             material=mat,
                             amount=quant,
-                            length=length,
-                            width=width,
+                            dimensions=Polygon([(0, 0), (0, length), (width, length), (width, 0), (0, 0)]).__str__(),
                             thickness=thickness,
                             tag=tag,
                             nestingFlag=check(nesting),
@@ -148,8 +149,7 @@ def part_panels_payload(data_frame: DataFrame, belongs_to: str, orderBy: str, **
                             sort=sort,
                             material=mat,
                             amount=quant,
-                            length=length,
-                            width=width,
+                            dimensions=Polygon([(0, 0), (0, length), (width, length), (width, 0), (0, 0)]).__str__(),
                             thickness=thickness,
                             tag=tag,
                             nestingFlag=check(nesting),

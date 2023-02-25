@@ -11,9 +11,7 @@ class PartPayload(BasePayload):
         self.partName = kwargs.get('partName', '')
         self.sort = kwargs.get('sort', '')
         self.material = kwargs.get('material', '')
-        self.amount = kwargs.get('amount', -1)
-        self.length = kwargs.get('length', -1)
-        self.width = kwargs.get('width', -1)
+        self.dimensions = kwargs.get('dimensions', -1)
         self.thickness = kwargs.get('thickness', -1)
         self.tag = kwargs.get("tag", -1)
         self.nestingFlag = kwargs.get("nestingFlag", False)
@@ -171,28 +169,12 @@ class PartPayload(BasePayload):
         self._thickness = thickness
 
     @property
-    def width(self) -> float:
-        return self._width
+    def dimensions(self) -> int:
+        return self._dimensions
 
-    @width.setter
-    def width(self, width: float) -> None:
-        self._width = width
-
-    @property
-    def length(self) -> float:
-        return self._length
-
-    @length.setter
-    def length(self, length: float) -> None:
-        self._length = length
-
-    @property
-    def amount(self) -> int:
-        return self._amount
-
-    @amount.setter
-    def amount(self, amount: int) -> None:
-        self._amount = amount
+    @dimensions.setter
+    def dimensions(self, dimensions: int) -> None:
+        self._dimensions = dimensions
 
     @property
     def partName(self) -> str:
