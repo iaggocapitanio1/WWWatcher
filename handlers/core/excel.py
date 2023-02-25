@@ -64,7 +64,7 @@ class ExcelHandler(object):
         compact_panels_df = self.get_data_frame(sheet_name="compact-panels", path=path)
         part_compact_panels_payload(data_frame=compact_panels_df, belongs_to=belongs_to, orderBy=orderBy)
         accessories_df = self.get_data_frame(sheet_name="accessories", path=path)
-        consumable_accessories_payload(data_frame=accessories_df, belongs_to=belongs_to, orderBy=orderBy)
+        consumable_accessories_payload(data_frame=accessories_df, belongs_to=belongs_to)
 
     def __call__(self, *args, **kwargs):
         belongs_to = kwargs.get("belongs_to", '')

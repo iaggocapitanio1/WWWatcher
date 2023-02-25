@@ -8,9 +8,19 @@ CLIENT_SECRET = "7e60884d-8cb9-4795-9584-8af8b807916c"
 
 TOKEN_URL = "http://woodwork4.ddns.net:3005/oauth2/token"
 
+WWW4_CLIENT_ID = "ZravrXPDNrHhQ7iG8nkeQm6D1x4GOXKmOf9wcnZB"
+
+WWW4_CLIENT_SECRET = "OBJfN0v23EC5Eyr94bDQvU6HiuAjCEwuAdqXctuAroNU3aaIXMkgjzvV88s4k73n9HtoHPNtP8AIckdJDCXYAOZmN2sXhOX" \
+                     "yCZFqNUbiPYLemEQRc4ZnKgNxNR9MXtR4"
+
+WWW4_TOKEN_URL = "http://woodwork4.ddns.net/ww4/auth/token"
+
+WW4_GET_CUSTOMER_URL = "http://127.0.0.1:8000/api/v1/accounts/get-customer/"
+
 PROJECTS_DIR = "/home/iaggo/Documents/ProjectsEins/WWWatcher/Projects"
 
 ORION_HOST = "http://woodwork4.ddns.net:1027"
+
 
 NGSI_LD_CONTEXT = "http://woodwork4.ddns.net:80/context/ww4zero.context-ngsi.jsonld"
 

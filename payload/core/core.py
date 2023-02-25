@@ -112,7 +112,7 @@ class BasePayload(object):
     def get(self, params=None):
         if not params:
             params = {}
-        return requests.get(self.url_with_pk(), headers=self.headers, params=params)
+        return requests.get(self.url_with_pk(), headers=self.headers, auth=oauth, params=params)
 
     def patch(self, params=None):
         return requests.patch(self.url_with_pk() + 'attrs/', self.partial_json(), auth=oauth, headers=self.headers,

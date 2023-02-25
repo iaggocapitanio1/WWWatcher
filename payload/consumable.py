@@ -3,7 +3,7 @@ from enum import Enum
 
 
 class ConsumablePayload(BasePayload):
-    RELATIONAL_PROPS = ['belongsTo', 'orderBy']
+    RELATIONAL_PROPS = ['belongsTo']
 
     class Status(Enum):
         WAITING_ORDER = 0

@@ -1,11 +1,13 @@
 import logging
-import os
 from pathlib import Path
 from typing import Union
+
+import requests
 from watchdog.events import PatternMatchingEventHandler, FileSystemEvent
-from settings import settings
+
 from handlers.core.excel import ExcelHandler
 from handlers.functions import get_file_name, generate_id
+from settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -16,11 +18,26 @@ class ExcelEventHandler(PatternMatchingEventHandler):
         self.excelHandler = ExcelHandler()
         self.path = kwargs.get('path', settings.PROJECTS_DIR)
 
-    def get_user(self):
-        for directory in self.path.__str__().split('/'):
+    @staticmethod
+    def get_customer(user):
+        if user is not None:
+            logger.info(msg=f"Trying to get the customer id")
+            response = requests.post(url=settings.WW4_GET_CUSTOMER_URL, data={"user_id": user})
+            if response.status_code == 200:
+                customer = response.json().get("customer")
+                logger.info(msg=f"Customer id found: {customer}")
+                return customer
+        logger.warning(msg="Fail to get customer id.")
+        return "undefined"
+
+    @staticmethod
+    def get_user(event):
+        for directory in event.src_path.__str__().split('/'):
             if directory.startswith('user_'):
+                logger.info(msg=f"found user id in event path, user id is {directory}")
                 return directory
-        return 'No user'
+        logger.warning(msg="Fail to get user id from event path.")
+        return None
 
     @property
     def path(self) -> Path:
@@ -34,7 +51,7 @@ class ExcelEventHandler(PatternMatchingEventHandler):
 
     def on_created(self, event: FileSystemEvent):
         logger.info("Creation of object detected!")
-        name = get_file_name(event.src_path).replace("LISTA_DE_CORTE", "")
+        name = get_file_name(event.src_path).replace("LISTA_DE_CORTE", "").lstrip("_")
         belongs_to = generate_id(name=name, object_type='Project')
-        order_by = generate_id(name=self.get_user(), object_type='Owner')
+        order_by = generate_id(name=self.get_customer(user=self.get_user(event)), object_type='Owner')
         self.excelHandler(path=event.src_path, belongs_to=belongs_to, orderBy=order_by)
