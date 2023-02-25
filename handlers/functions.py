@@ -1,11 +1,12 @@
-import logging
-from pandas import DataFrame
-from typing import Union
 import datetime
+import logging
 from pathlib import Path
+from typing import Union
+
+from pandas import DataFrame
+
 from payload import ConsumablePayload, PartPayload
 from settings import settings
-from geojson import Polygon
 
 logger = logging.getLogger(__name__)
 
