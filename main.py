@@ -3,7 +3,7 @@ import os
 import time
 import watchdog.observers
 
-from handlers.hadlers import ExcelEventHandler
+from handlers.handlers import ExcelEventHandler
 from settings import settings
 
 if __name__ == "__main__":

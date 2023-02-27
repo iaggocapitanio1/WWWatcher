@@ -2,7 +2,10 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
+DEV = False
+
+if DEV:
+    load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -82,7 +85,7 @@ LOGGER = {
             ],
             "propagate": True
         },
-        "handlers.core.excel.utilities": {
+        "handlers.core.utilities": {
             "level": "DEBUG",
             "handlers": [
                 "console",

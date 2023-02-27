@@ -22,17 +22,21 @@ class ExcelEventHandler(PatternMatchingEventHandler):
     def get_customer(user):
         if user is not None:
             logger.info(msg=f"Trying to get the customer id")
+            logger.info(msg=f"url: {settings.WW4_GET_CUSTOMER_URL}")
+            logger.info(msg=f"data: {user}")
             response = requests.post(url=settings.WW4_GET_CUSTOMER_URL, data={"user_id": user})
+            logger.info(msg=f"Response: {response.text}, Status Code: {response.status_code}")
             if response.status_code == 200:
                 customer = response.json().get("customer")
                 logger.info(msg=f"Customer id found: {customer}")
                 return customer
-        logger.warning(msg="Fail to get customer id.")
+        logger.warning(msg=f"Fail to get customer id. ")
         return "undefined"
 
     @staticmethod
     def get_user(event):
         for directory in event.src_path.__str__().split('/'):
+            logger.info(msg=f"trying to find user id in directory: {directory}")
             if directory.startswith('user_'):
                 logger.info(msg=f"found user id in event path, user id is {directory}")
                 return directory
