@@ -1,0 +1,20 @@
+version: "3.9"
+
+services:
+    watcher:
+        hostname: watcher
+        build: .
+        restart: always
+        tty: true
+        volumes:
+            - ./Projects:/home/app/Projects
+        environment:
+          - CLIENT_ID=b33ed854-1682-4d41-a035-4b7be543790b
+          - CLIENT_SECRET=7e60884d-8cb9-4795-9584-8af8b807916c
+          - TOKEN_URL=http://woodwork4.ddns.net:3005/oauth2/token
+          - WW4_GET_CUSTOMER_URL=http://woodwork4.ddns.net/ww4/api/v1/accounts/get-customer/
+          - PROJECTS_DIR=/home/app/
+          - ORION_HOST=http://woodwork4.ddns.net:1027
+          - NGSI_LD_CONTEXT=http://woodwork4.ddns.net:80/context/ww4zero.context-ngsi.jsonld
+        networks:
+            - default
