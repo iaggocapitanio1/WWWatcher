@@ -2,7 +2,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 
-DEV = False
+DEV = True
 
 if DEV:
     load_dotenv()
