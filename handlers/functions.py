@@ -184,3 +184,4 @@ def part_panels_payload(data_frame: DataFrame, belongs_to: str, orderBy: str, **
             logger.debug(msg=f"Trying to patch Panels...")
             response = panel.patch()
             logger.debug(msg=f"Response Status Code: {response.status_code}")
+            logger.info(msg=f"Response text : {response.text}")
