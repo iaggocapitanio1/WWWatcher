@@ -20,6 +20,7 @@ def process_event(event_type, event):
     furniture_id = functions.generate_id(name=furniture, object_type='Furniture')
     panels_dataframe = sheet.get_data_frame(path=path, sheet_name="panels")
     compact_panels_dataframe = sheet.get_data_frame(path=path, sheet_name="compact-panels")
+    accessories_dataframe = sheet.get_data_frame(path=path, sheet_name="accessories")
     modules: list = sheet.read_data_module(input_data=path)
     functions.part_panels_payload(data_frame=panels_dataframe, belongs_to=project_id, belongs_to_furniture=furniture_id,
                                   modules=modules)

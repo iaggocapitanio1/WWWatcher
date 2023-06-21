@@ -142,11 +142,12 @@ def consumable_accessories_payload(data_frame: DataFrame, belongs_to: str, **kwa
     observed_at = kwargs.get("observed_at", datetime.datetime.utcnow().isoformat())
     if data_frame is None:
         return
-    for _, row in data_frame.iterrows():
-        name, mat, quant, obs = row
-        process_row(name, ConsumablePayload, belongs_to, name=name, amount=quant, status=0, object_type='Consumable')
-
-
+    try:
+        for _, row in data_frame.iterrows():
+            name, mat, quant, obs = row
+            process_row(name, ConsumablePayload, belongs_to, name=name, amount=quant, status=0, object_type='Consumable')
+    except ValueError as error:
+        logger.error(f"Error: Unable to process consumable accessories payload. {error}")
 def part_compact_panels_payload(data_frame: DataFrame, belongs_to: str, belongs_to_furniture: str, modules: list,
                                 **kwargs):
     if data_frame is None:
