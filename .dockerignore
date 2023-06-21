@@ -23,6 +23,11 @@ coverage.xml
 .aws
 staticfiles
 media
+media/*
+build.sh
+docker-compose.yaml
+venv
+venv/*
 static
 *.sqlite3
-build.sh
+cache.json

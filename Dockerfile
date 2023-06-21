@@ -1,9 +1,9 @@
-FROM python:3.8-slim-buster
+FROM python:3.9.12-slim-buster
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONBUFFERED=1 \
     APP_DIR=/home/app\
-    WHATCH_DIR=/home/app/Projects
+    WHATCH_DIR=/home/app/media/public/mofreitas/clientes
 
 WORKDIR $APP_DIR
 

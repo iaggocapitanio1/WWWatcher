@@ -1,5 +1,5 @@
 from requests_auth import OAuth2ClientCredentials, OAuth2, JsonTokenFileCache
-from settings import settings
+import settings
 
 
 OAuth2.token_cache = JsonTokenFileCache('./cache.json')
