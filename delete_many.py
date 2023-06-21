@@ -1,17 +1,20 @@
 import requests
 from requests import request
-from settings.client import oauth
-from settings.settings import ORION_HOST, ORION_HEADERS
+import settings
+from client import oauth
 
 # types = ["Part", "Owner", "Project", "Consumable", "Budget", "Assembly", "Machine", "Worker", "Organization",
 #          "Expedition"]
 
 types = ["Part", ]
-for t in types:
+# host = "193.136.195.25/ww4"
+host = "localhost:8000"
 
-    data = requests.get(url=ORION_HOST + f"/ngsi-ld/v1/entities?type={t}", auth=oauth, headers=ORION_HEADERS)
-    parts = data.json()
+
+data = requests.get(url=f"http://{host}/api/v1/part/?q=belongsTo==%22urn:ngsi-ld:Project:Braga%22", auth=oauth,)
+parts = data.json()
+print(data.status_code, parts)
+if data.status_code == 200:
     for part in parts:
-        response = requests.delete(url=ORION_HOST + f"/ngsi-ld/v1/entities/{part.get('id')}", auth=oauth,
-                                   headers=ORION_HEADERS)
+        response = requests.delete(url=f"http://{host}/api/v1/part/{part.get('id')}", auth=oauth,)
         print(response.status_code)

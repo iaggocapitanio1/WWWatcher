@@ -3,7 +3,7 @@ from .core.core import BasePayload
 
 # noinspection PyPep8Naming
 class PartPayload(BasePayload):
-    RELATIONAL_PROPS = ['belongsTo', 'orderBy', ]
+    RELATIONAL_PROPS = ['belongsTo', 'belongsToFurniture', 'belongsToModule']
     GEO_PROPERTY = ["dimensions"]
 
     def __init__(self, **kwargs):
@@ -32,8 +32,17 @@ class PartPayload(BasePayload):
         self.weight = kwargs.get("weight", -1)
         self.image = kwargs.get("image", "")
         self.belongsTo = kwargs.get("belongsTo", "")
-        self.orderBy = kwargs.get("orderBy", "")
+        self.belongsToFurniture = kwargs.get("belongsToFurniture", "")
+        self.belongsToModule = kwargs.get("belongsToModule", "")
         self.tupia = kwargs.get("tupia", "")
+
+    @property
+    def belongsToModule(self) -> str:
+        return self._belongsToModule
+
+    @belongsToModule.setter
+    def belongsToModule(self, belongsToModule: str) -> None:
+        self._belongsToModule = belongsToModule
 
     @property
     def belongsTo(self) -> str:
@@ -220,9 +229,9 @@ class PartPayload(BasePayload):
         self._material = material
 
     @property
-    def orderBy(self) -> bool:
-        return self._orderBy
+    def belongsToFurniture(self) -> str:
+        return self._belongsToFurniture
 
-    @orderBy.setter
-    def orderBy(self, orderBy: bool) -> None:
-        self._orderBy = orderBy
+    @belongsToFurniture.setter
+    def belongsToFurniture(self, belongsToFurniture: str) -> None:
+        self._belongsToFurniture = belongsToFurniture

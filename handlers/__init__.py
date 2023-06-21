@@ -1,1 +1,0 @@
-from .functions import consumable_accessories_payload, part_panels_payload, part_compact_panels_payload

@@ -16,10 +16,9 @@ class AssemblyPayload(BasePayload):
         super(AssemblyPayload, self).__init__(**kwargs)
         self.type = kwargs.get('type', 'Part')
         self.startTime = kwargs.get('startTime', '')
-        self.finishTime = kwargs.get('finishTime', '')
-        self.assemblyStatus = kwargs.get('assemblyStatus', 0)
+        self.endTime = kwargs.get('endTime', '')
+        self.statusAssembly = kwargs.get('statusAssembly', 0)
         self.belongsTo = kwargs.get("belongsTo", "")
-        self.orderBy = kwargs.get("orderBy", "")
 
     @property
     def belongsTo(self) -> str:
@@ -38,25 +37,17 @@ class AssemblyPayload(BasePayload):
         self._startTime = startTime
 
     @property
-    def finishTime(self) -> str:
-        return self._finishTime
+    def endTime(self) -> str:
+        return self._endTime
 
-    @finishTime.setter
-    def finishTime(self, finishTime: str) -> None:
-        self._finishTime = finishTime
-
-    @property
-    def assemblyStatus(self) -> int:
-        return self._assemblyStatus
-
-    @assemblyStatus.setter
-    def assemblyStatus(self, assemblyStatus: int) -> None:
-        self._assemblyStatus = assemblyStatus
+    @endTime.setter
+    def endTime(self, endTime: str) -> None:
+        self._endTime = endTime
 
     @property
-    def orderBy(self) -> bool:
-        return self._orderBy
+    def statusAssembly(self) -> int:
+        return self._statusAssembly
 
-    @orderBy.setter
-    def orderBy(self, orderBy: bool) -> None:
-        self._orderBy = orderBy
+    @statusAssembly.setter
+    def statusAssembly(self, statusAssembly: int) -> None:
+        self._statusAssembly = statusAssembly
