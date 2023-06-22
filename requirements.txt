@@ -15,5 +15,6 @@ requests==2.31.0
 requests-auth==6.0.0
 six==1.16.0
 tzdata==2023.3
+Unidecode==1.3.6
 urllib3==2.0.3
 watchdog==3.0.0
