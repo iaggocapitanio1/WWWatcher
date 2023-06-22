@@ -15,7 +15,7 @@ def mega_bytes_to_bits(mega: int) -> int:
 
 BASE_DIR = Path(__file__).resolve().parent
 
-PRODUCTION = False
+PRODUCTION = True
 
 if not PRODUCTION:
     load_dotenv(BASE_DIR.joinpath('.dev.env'))

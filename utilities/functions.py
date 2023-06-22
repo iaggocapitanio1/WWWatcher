@@ -1,14 +1,14 @@
-import datetime
 import functools
 import logging
+import re
 from pathlib import Path
 from typing import Union, Optional, List
-import re
+from utilities.http_request import make_request
 from pandas import DataFrame
+from unidecode import unidecode
 
 import settings
-from payload import ConsumablePayload
-from payload import PartPayload
+from payload import ConsumablePayload, PartPayload, ModulePayload
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +61,14 @@ def get_budget_name(path: Union[str, Path]) -> str:
     return path.parts[path.parts.index(settings.KEYWORD) + 2]
 
 
+def get_customer_id(path: Union[str, Path]) -> str:
+    email = get_email(path)
+    response = make_request(method='POST', relative_url='accounts/get-customer/', data={'email': email})
+    if response.status_code == 200:
+        return response.json()['customer']
+    return ''
+
+
 def get_path_after_keyword(path: Union[str, Path]) -> Optional[Path]:
     try:
         logger.info(f"Trying to get reference path after keyword {settings.KEYWORD}: {path}")
@@ -73,7 +81,9 @@ def get_path_after_keyword(path: Union[str, Path]) -> Optional[Path]:
 
 
 def generate_id(name: str, object_type: str = 'Part') -> str:
-    return f'urn:ngsi-ld:{object_type}:{name}'
+    name_ascii = unidecode(name)
+    name_cleaned = re.sub(r'[^a-zA-Z0-9_-]', '', name_ascii)
+    return f'urn:ngsi-ld:{object_type}:{name_cleaned}'
 
 
 def check(string: str) -> bool:
@@ -92,6 +102,17 @@ def send_payload(payload):
             logger.info(f"Response Status Code: {response.status_code}")
     except Exception as error:
         logger.error(f"Error: Unable to send payload. {error}")
+
+
+def batch_modules_payload(belongs_to_furniture: str, modules: list, prefix: str = '') -> None:
+    if not modules:
+        return
+    if prefix and not prefix.endswith("_"):
+        prefix = prefix + "_"
+    for module in modules:
+        identifier = generate_id(clean_name(f"{prefix}{module}"), object_type='Module')
+        payload = ModulePayload(id=identifier, name=module, belongsToFurniture=belongs_to_furniture)
+        send_payload(payload)
 
 
 def get_correlated_module(part: str, modules: list) -> str:
@@ -133,21 +154,25 @@ def generate_dimensions(coordinates: List[List[int]] = None) -> dict:
 
 def process_row(name, payload_cls, belongs_to, **kwargs):
     object_type = kwargs.get("object_type", "Part")
+    if object_type == 'Consumable':
+        kwargs.update(dict(name=name))
     identifier = generate_id(clean_name(name), object_type=object_type)
     payload = payload_cls(id=identifier, belongsTo=belongs_to, **kwargs)
     send_payload(payload)
 
 
-def consumable_accessories_payload(data_frame: DataFrame, belongs_to: str, **kwargs):
-    observed_at = kwargs.get("observed_at", datetime.datetime.utcnow().isoformat())
+def consumable_accessories_payload(data_frame: DataFrame, belongs_to: str, belongs_to_furniture: str, **kwargs):
     if data_frame is None:
         return
     try:
         for _, row in data_frame.iterrows():
             name, mat, quant, obs = row
-            process_row(name, ConsumablePayload, belongs_to, name=name, amount=quant, status=0, object_type='Consumable')
+            process_row(name, ConsumablePayload, belongs_to, amount=quant, belongsToFurniture=belongs_to_furniture,
+                        status=0, object_type='Consumable')
     except ValueError as error:
         logger.error(f"Error: Unable to process consumable accessories payload. {error}")
+
+
 def part_compact_panels_payload(data_frame: DataFrame, belongs_to: str, belongs_to_furniture: str, modules: list,
                                 **kwargs):
     if data_frame is None:

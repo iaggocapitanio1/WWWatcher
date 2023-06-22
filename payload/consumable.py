@@ -3,7 +3,8 @@ from enum import Enum
 
 
 class ConsumablePayload(BasePayload):
-    RELATIONAL_PROPS = ['belongsTo']
+    RELATIONAL_PROPS = ['belongsTo', 'belongsToFurniture']
+    RESOURCE = 'consumable/'
 
     class Status(Enum):
         WAITING_ORDER = 0
@@ -13,11 +14,13 @@ class ConsumablePayload(BasePayload):
 
     def __init__(self, **kwargs):
         super(ConsumablePayload, self).__init__(**kwargs)
+        self.type = kwargs.get('type', 'Consumable')
         self.name = kwargs.get('name', '')
         self.amount = kwargs.get('amount', -1)
         self.status = kwargs.get('status', 0)
         self.belongsTo = kwargs.get('belongsTo', '')
         self.image = kwargs.get('image', '')
+        self.belongsToFurniture = kwargs.get('belongsToFurniture', '')
 
     @property
     def name(self) -> str:
@@ -50,6 +53,14 @@ class ConsumablePayload(BasePayload):
     @belongsTo.setter
     def belongsTo(self, belongsTo: str) -> None:
         self._belongsTo = belongsTo
+
+    @property
+    def belongsToFurniture(self) -> str:
+        return self._belongsToFurniture
+
+    @belongsToFurniture.setter
+    def belongsToFurniture(self, belongsToFurniture: str) -> None:
+        self._belongsToFurniture = belongsToFurniture
 
     @property
     def image(self) -> str:
