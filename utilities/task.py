@@ -19,6 +19,7 @@ def process_event(event_type, event):
     furniture = functions.get_furniture_name(file=file_name, budget_name=budget)
     project_id = functions.generate_id(name=f'{customer_id}_{budget}', object_type='Project')
     furniture_id = functions.generate_id(name=f'{customer_id}_{budget}_{furniture}', object_type='Furniture')
+
     panels_dataframe = sheet.get_data_frame(path=path, sheet_name="panels")
     compact_panels_dataframe = sheet.get_data_frame(path=path, sheet_name="compact-panels")
     accessories_dataframe = sheet.get_data_frame(path=path, sheet_name="accessories")

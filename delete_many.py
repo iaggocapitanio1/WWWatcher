@@ -11,7 +11,7 @@ host = "193.136.195.33/ww4"
 # host = "localhost:8000"
 # url=f"http://{host}/api/v1/consumable/?q=belongsTo==%22urn:ngsi-ld:Project:Chanut%22"
 resource = "part"
-url = f'http://{host}/api/v1/{resource}/?limit=1000&q=belongsToFurniture=="urn:ngsi-ld:Furniture:Chanut_group1_subgroup00_CH_AMIS_A1_REM_ESQ_L8Y5d0LMQZeRPXnjkChanut"'
+url = f'http://{host}/api/v1/{resource}/?limit=1000&q=belongsTo=="urn:ngsi-ld:Project:customer_8Y5d0LMQZeRPXnjk_Chanut"'
 # url = f'http://{host}/api/v1/{resource}/?limit=1000&q=belongsTo=="urn:ngsi-ld:Project:Chanut"'
 data = requests.get(url, auth=oauth,)
 parts = data.json()

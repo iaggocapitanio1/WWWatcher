@@ -98,7 +98,8 @@ def send_payload(payload):
         logger.info(response.status_code, response.json())
         if response.status_code == 409:
             logger.info("Trying to patch payload...")
-            response = payload.patch()
+            response = payload.delete()
+            payload.post()
             logger.info(f"Response Status Code: {response.status_code}")
     except Exception as error:
         logger.error(f"Error: Unable to send payload. {error}")

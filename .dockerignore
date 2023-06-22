@@ -31,3 +31,4 @@ venv/*
 static
 *.sqlite3
 cache.json
+.dev.env
