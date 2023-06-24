@@ -1,8 +1,7 @@
 import logging.config
-from utilities import functions, sheet
-import settings
 
-logging.config.dictConfig(settings.LOGGER)
+from utilities import functions, sheet
+
 logger = logging.getLogger(__name__)
 
 
@@ -16,19 +15,23 @@ def process_event(event_type, event):
         return
     if event_type == "delete":
         return
-    furniture = functions.get_furniture_name(file=file_name, budget_name=budget)
+    # furniture = functions.get_furniture_name(file=file_name, budget_name=budget)
     project_id = functions.generate_id(name=f'{customer_id}_{budget}', object_type='Project')
-    furniture_id = functions.generate_id(name=f'{customer_id}_{budget}_{furniture}', object_type='Furniture')
+    furniture_ids: list = functions.get_furniture_ids(excel_file_name=file_name, folder_target=path.parent)
+    if not furniture_ids:
+        return
 
     panels_dataframe = sheet.get_data_frame(path=path, sheet_name="panels")
     compact_panels_dataframe = sheet.get_data_frame(path=path, sheet_name="compact-panels")
     accessories_dataframe = sheet.get_data_frame(path=path, sheet_name="accessories")
     modules: list = sheet.read_data_module(input_data=path)
-    functions.batch_modules_payload(belongs_to_furniture=furniture_id, modules=modules,
-                                    prefix=f'{customer_id}_{budget}_{furniture}')
-    functions.part_panels_payload(data_frame=panels_dataframe, belongs_to=project_id, belongs_to_furniture=furniture_id,
-                                  modules=modules)
-    functions.part_compact_panels_payload(data_frame=compact_panels_dataframe, belongs_to=project_id, modules=modules,
-                                          belongs_to_furniture=furniture_id)
-    functions.consumable_accessories_payload(data_frame=accessories_dataframe, belongs_to=project_id,
-                                             belongs_to_furniture=furniture_id)
+
+    for furniture_id in furniture_ids:
+        prefix = f'{customer_id}_{budget}_{furniture_id}'
+        functions.batch_modules_payload(belongs_to_furniture=furniture_id, modules=modules, prefix=prefix)
+        functions.part_panels_payload(data_frame=panels_dataframe, belongs_to=project_id,
+                                      belongs_to_furniture=furniture_id, modules=modules, prefix=prefix)
+        functions.part_compact_panels_payload(data_frame=compact_panels_dataframe, belongs_to=project_id,
+                                              modules=modules, belongs_to_furniture=furniture_id, prefix=prefix)
+        functions.consumable_accessories_payload(data_frame=accessories_dataframe, belongs_to=project_id,
+                                                 belongs_to_furniture=furniture_id, prefix=prefix)

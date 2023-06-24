@@ -4,13 +4,39 @@ import re
 from pathlib import Path
 from typing import Union, Optional, List
 from utilities.http_request import make_request
-from pandas import DataFrame
+from pandas import DataFrame, read_excel
 from unidecode import unidecode
 
 import settings
 from payload import ConsumablePayload, PartPayload, ModulePayload
 
 logger = logging.getLogger(__name__)
+
+
+def get_furniture_ids(excel_file_name, folder_target: Path):
+    """
+    Get a list of furniture IDs related to the given Excel file name.
+
+    Args:
+        excel_file_name (str): The name of the Excel file to search for.
+        folder_target (Path): The target folder where the mapping file is located.
+
+    Returns:
+        list: A list of furniture IDs related to the given Excel file name.
+              Returns an empty list if the mapping file doesn't exist.
+    """
+    mapping_file = folder_target / settings.MAPPING_FILE
+    furniture_ids = set()
+    if not mapping_file.exists():
+        logger.error("Mapping file does not exist.")
+        return list(furniture_ids)
+
+    df = read_excel(mapping_file)
+    for column in df.columns:
+        if (df[column].str.strip() == excel_file_name).any():
+            ids = df.loc[df[column].str.strip() == excel_file_name, 'id\lists'].tolist()
+            furniture_ids.update(ids)
+    return list(furniture_ids)
 
 
 def validate_path(path: Union[str, Path]) -> Path:
@@ -83,6 +109,7 @@ def get_path_after_keyword(path: Union[str, Path]) -> Optional[Path]:
 def generate_id(name: str, object_type: str = 'Part') -> str:
     name_ascii = unidecode(name)
     name_cleaned = re.sub(r'[^a-zA-Z0-9_-]', '', name_ascii)
+    name_cleaned = clean_name(name_cleaned)
     return f'urn:ngsi-ld:{object_type}:{name_cleaned}'
 
 
@@ -95,12 +122,23 @@ def send_payload(payload):
         logger.info("Trying to post payload...")
         response = payload.post()
         logger.info(f"Response Status Code: {response.status_code}")
-        logger.info(response.status_code, response.json())
         if response.status_code == 409:
             logger.info("Trying to patch payload...")
             response = payload.delete()
-            payload.post()
-            logger.info(f"Response Status Code: {response.status_code}")
+            logger.info(f"Delete Status Code: {response.status_code}")
+            response = payload.post()
+            logger.info(f"Post Status Code: {response.status_code}")
+
+        if response.status_code == 201 or response.status_code == 200:
+            logger.info(response.status_code)
+            logger.info(response.json())
+        elif len(response.text) < 300:
+            logger.info(response.status_code)
+            logger.info(response.text)
+        else:
+            logger.info(response.status_code)
+            logger.info("Response too long to display.")
+
     except Exception as error:
         logger.error(f"Error: Unable to send payload. {error}")
 
@@ -111,7 +149,7 @@ def batch_modules_payload(belongs_to_furniture: str, modules: list, prefix: str 
     if prefix and not prefix.endswith("_"):
         prefix = prefix + "_"
     for module in modules:
-        identifier = generate_id(clean_name(f"{prefix}{module}"), object_type='Module')
+        identifier = generate_id(f"{prefix}{module}", object_type='Module')
         payload = ModulePayload(id=identifier, name=module, belongsToFurniture=belongs_to_furniture)
         send_payload(payload)
 
@@ -127,23 +165,16 @@ def get_correlated_module(part: str, modules: list) -> str:
     Returns:
     - str: The correlated module name. Returns an empty string if no correlation is found.
     """
-    # Keep track of the longest match
     longest_match = ""
-
-    # Iterate over each module in the list
     for module in modules:
-        # Check if the module name is a substring of the part name
-        # and is longer than the previous longest match
         if module in part and len(module) > len(longest_match):
             longest_match = module
-
-    # Return the longest match found
     return longest_match
 
 
-def get_module(name: str, modules: list) -> str:
+def get_module(name: str, prefix: str, modules: list) -> str:
     module: str = get_correlated_module(name, modules=modules)
-    return generate_id(module, object_type='Module')
+    return generate_id(f"{prefix}{module}", object_type='Module')
 
 
 @functools.cache
@@ -155,27 +186,30 @@ def generate_dimensions(coordinates: List[List[int]] = None) -> dict:
 
 def process_row(name, payload_cls, belongs_to, **kwargs):
     object_type = kwargs.get("object_type", "Part")
+    identifier = generate_id(name, object_type=object_type)
     if object_type == 'Consumable':
+        prefix = kwargs.pop("prefix")
         kwargs.update(dict(name=name))
-    identifier = generate_id(clean_name(name), object_type=object_type)
+        identifier = generate_id(f"{prefix}{name}", object_type=object_type)
     payload = payload_cls(id=identifier, belongsTo=belongs_to, **kwargs)
     send_payload(payload)
 
 
-def consumable_accessories_payload(data_frame: DataFrame, belongs_to: str, belongs_to_furniture: str, **kwargs):
+def consumable_accessories_payload(data_frame: DataFrame, belongs_to: str, belongs_to_furniture: str, prefix: str,
+                                   **kwargs):
     if data_frame is None:
         return
     try:
         for _, row in data_frame.iterrows():
             name, mat, quant, obs = row
             process_row(name, ConsumablePayload, belongs_to, amount=quant, belongsToFurniture=belongs_to_furniture,
-                        status=0, object_type='Consumable')
+                        status=0, object_type='Consumable', prefix=prefix)
     except ValueError as error:
         logger.error(f"Error: Unable to process consumable accessories payload. {error}")
 
 
 def part_compact_panels_payload(data_frame: DataFrame, belongs_to: str, belongs_to_furniture: str, modules: list,
-                                **kwargs):
+                                prefix: str, **kwargs):
     if data_frame is None:
         return
     for _, row in data_frame.iterrows():
@@ -183,12 +217,12 @@ def part_compact_panels_payload(data_frame: DataFrame, belongs_to: str, belongs_
         process_row(name, PartPayload, belongs_to, partName=name, material=mat, amount=quant, length=length,
                     weight=width, dimensions=generate_dimensions(), thickness=thickness, tag=tag, cncFlag=check(cnc),
                     nestingFlag=check(nesting), f2=f2, f3=f3, f4=f4, f5=f5, observation=obs,
-                    belongsToModule=get_module(name, modules=modules), belongsToFurniture=belongs_to_furniture)
+                    belongsToModule=get_module(name, prefix, modules=modules),
+                    belongsToFurniture=belongs_to_furniture)
 
 
-def part_panels_payload(data_frame: DataFrame, belongs_to: str, belongs_to_furniture: str, modules: list, **kwargs):
-    furn = belongs_to_furniture.split(':')[-1]
-    proj = belongs_to.split(':')[-1]
+def part_panels_payload(data_frame: DataFrame, belongs_to: str, belongs_to_furniture: str, modules: list, prefix: str,
+                        **kwargs):
     if data_frame is None:
         return
     for _, row in data_frame.iterrows():
@@ -198,4 +232,4 @@ def part_panels_payload(data_frame: DataFrame, belongs_to: str, belongs_to_furni
                     width=width, weight=weight, dimensions=generate_dimensions(), thickness=thickness, tag=tag,
                     nestingFlag=check(nesting), cncFlag=check(cnc), f2=f2, f3=f3, f4=f4, f5=f5, groove=groove,
                     belongsToFurniture=belongs_to_furniture, orla2=check(o2), orla3=check(o3), orla4=check(o4),
-                    orla5=check(o5), observation=obs, belongsToModule=get_module(name, modules))
+                    orla5=check(o5), observation=obs, belongsToModule=get_module(name, prefix ,modules),)

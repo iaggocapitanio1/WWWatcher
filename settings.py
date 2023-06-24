@@ -15,6 +15,14 @@ def mega_bytes_to_bits(mega: int) -> int:
 
 BASE_DIR = Path(__file__).resolve().parent
 
+CACHE_DIR = BASE_DIR.joinpath('cache')
+
+CACHE_DIR.mkdir(exist_ok=True, parents=True)
+
+CACHE_FILE = CACHE_DIR.joinpath('cache.json')
+
+CACHE_FILE.touch(exist_ok=True)
+
 PRODUCTION = True
 
 if not PRODUCTION:
@@ -33,6 +41,8 @@ def parse_env(string: str) -> str:
 
 
 DELAY_FOR_SCAN = int(os.environ.get(parse_env("DELAY_FOR_SCAN"), 20))
+
+MAPPING_FILE = os.environ.get(parse_env("MAPPING_FILE"), "MAPPING.xlsx")
 
 SLEEP_DURATION = int(os.environ.get(parse_env("DELAY_FOR_SCAN"), 0.3))
 
